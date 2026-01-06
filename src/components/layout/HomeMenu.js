@@ -1,5 +1,6 @@
 'use client';
 
+import SectionHeaders from "@/components/layout/SectionHeaders";
 import MenuItem from "@/components/menu/MenuItem";
 import Image from "next/image";
 import {useEffect, useState} from "react";
@@ -29,13 +30,11 @@ export default function HomeMenu() {
       </div>
 
       <div className="text-center mb-4">
-        <h3 className="uppercase text-gray-500 font-semibold leading-4">
-          Check out
-        </h3>
-        <h2 className="text-primary font-bold text-4xl italic">
-          Menus
-        </h2>
+        <SectionHeaders
+          subHeader={'check out'}
+          mainHeader={'Our Best Sellers'} />
       </div>
+
       <div className="grid sm:grid-cols-3 gap-4">
  
           <MenuItem />
