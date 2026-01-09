@@ -3,9 +3,18 @@ import CredentialsProvider from "next-auth/providers/credentials"
 import * as mongoose from "mongoose";
 import bcrypt from "bcrypt";
 import {User} from '@/models/User';
+import GoogleProvider from "next-auth/providers/google";
+
 
 const handler = NextAuth({
+
+
+
   providers: [
+    GoogleProvider({
+    clientId: process.env.GOOGLE_CLIENT_ID,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET
+  }),
   CredentialsProvider({
  
       name: 'Credentials',
