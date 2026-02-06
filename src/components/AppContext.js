@@ -1,72 +1,92 @@
-'use client';
-import {SessionProvider} from "next-auth/react";
-import {createContext, useEffect, useState} from "react";
+"use client";
 
+import { SessionProvider, useSession } from "next-auth/react";
+import { createContext, useEffect, useMemo, useState } from "react";
+import toast from "react-hot-toast";
 
 export const CartContext = createContext({});
 
 export function cartProductPrice(cartProduct) {
   let price = cartProduct.basePrice;
-  if (cartProduct.size) {
-    price += cartProduct.size.price;
-  }
+  if (cartProduct.size) price += cartProduct.size.price;
   if (cartProduct.extras?.length > 0) {
-    for (const extra of cartProduct.extras) {
-      price += extra.price;
-    }
+    for (const extra of cartProduct.extras) price += extra.price;
   }
   return price;
 }
 
-export function AppProvider({children}) {
-  const [cartProducts,setCartProducts] = useState([]);
+function CartProviderInner({ children }) {
+  const { data: session } = useSession();
+  const userEmail = session?.user?.email || null;
 
-  const ls = typeof window !== 'undefined' ? window.localStorage : null;
+  const ls = typeof window !== "undefined" ? window.localStorage : null;
 
+  // ✅ cart key po korisniku (guest ili email)
+  const storageKey = useMemo(() => {
+    return userEmail ? `cart:${userEmail}` : "cart:guest";
+  }, [userEmail]);
+
+  const [cartProducts, setCartProducts] = useState([]);
+  const [loaded, setLoaded] = useState(false);
+
+  // ✅ učitaj cart kad se promeni korisnik (login/logout)
   useEffect(() => {
-    if (ls && ls.getItem('cart')) {
-      setCartProducts( JSON.parse( ls.getItem('cart') ) );
-    }
-  }, []);
+    if (!ls) return;
+    const saved = ls.getItem(storageKey);
+    setCartProducts(saved ? JSON.parse(saved) : []);
+    setLoaded(true);
+  }, [ls, storageKey]);
+
+  function saveCartProductsToLocalStorage(products) {
+    if (!ls) return;
+    ls.setItem(storageKey, JSON.stringify(products));
+  }
+
+  // ✅ auto-save na svaku promenu (posle load)
+  useEffect(() => {
+    if (!loaded) return;
+    saveCartProductsToLocalStorage(cartProducts);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cartProducts, loaded, storageKey]);
 
   function clearCart() {
     setCartProducts([]);
-    saveCartProductsToLocalStorage([]);
+    if (ls) ls.removeItem(storageKey);
   }
 
+  // ✅ remove po index-u (najstabilnije)
   function removeCartProduct(indexToRemove) {
-    setCartProducts(prevCartProducts => {
-      const newCartProducts = prevCartProducts
-        .filter((v,index) => index !== indexToRemove);
-      saveCartProductsToLocalStorage(newCartProducts);
-      return newCartProducts;
-    });
-    toast.success('Product removed');
+    setCartProducts((prev) => prev.filter((_, idx) => idx !== indexToRemove));
+    toast.success("Product removed");
   }
 
-  function saveCartProductsToLocalStorage(cartProducts) {
-    if (ls) {
-      ls.setItem('cart', JSON.stringify(cartProducts));
-    }
-  }
-
-  function addToCart(product, size=null, extras=[]) {
-    setCartProducts(prevProducts => {
-      const cartProduct = {...product, size, extras};
-      const newProducts = [...prevProducts, cartProduct];
-      saveCartProductsToLocalStorage(newProducts);
-      return newProducts;
+  function addToCart(product, size = null, extras = []) {
+    setCartProducts((prev) => {
+      const cartProduct = { ...product, size, extras };
+      return [...prev, cartProduct];
     });
+    toast.success("Added to cart");
   }
 
   return (
+    <CartContext.Provider
+      value={{
+        cartProducts,
+        setCartProducts,
+        addToCart,
+        removeCartProduct,
+        clearCart,
+      }}
+    >
+      {children}
+    </CartContext.Provider>
+  );
+}
+
+export function AppProvider({ children }) {
+  return (
     <SessionProvider>
-      <CartContext.Provider value={{
-        cartProducts, setCartProducts,
-        addToCart, removeCartProduct, clearCart,
-      }}>
-        {children}
-      </CartContext.Provider>
+      <CartProviderInner>{children}</CartProviderInner>
     </SessionProvider>
   );
 }

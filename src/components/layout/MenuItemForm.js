@@ -2,76 +2,176 @@ import Plus from "@/components/icons/Plus";
 import Trash from "@/components/icons/Trash";
 import EditableImage from "@/components/layout/EditableImage";
 import MenuItemPriceProps from "@/components/layout/MenuItemPriceProps";
-import {useEffect, useState} from "react";
+import { useEffect, useMemo, useState } from "react";
 
-export default function MenuItemForm({onSubmit,menuItem}) {
-  const [image, setImage] = useState(menuItem?.image || '');
-  const [name, setName] = useState(menuItem?.name || '');
-  const [description, setDescription] = useState(menuItem?.description || '');
-  const [basePrice, setBasePrice] = useState(menuItem?.basePrice || '');
+export default function MenuItemForm({ onSubmit, menuItem }) {
+  const isEdit = !!menuItem?._id;
+
+  const [image, setImage] = useState(menuItem?.image || "");
+  const [name, setName] = useState(menuItem?.name || "");
+  const [description, setDescription] = useState(menuItem?.description || "");
+  const [basePrice, setBasePrice] = useState(
+    menuItem?.basePrice?.toString?.() ?? ""
+  );
   const [sizes, setSizes] = useState(menuItem?.sizes || []);
-  const [category, setCategory] = useState(menuItem?.category || '');
+  const [extraIngredientPrices, setExtraIngredientPrices] = useState(
+    menuItem?.extraIngredientPrices || []
+  );
+
+  // bitno: za create krece kao "", ali ce dobiti default kad stignu kategorije
+  const [category, setCategory] = useState(
+    menuItem?.category?._id || menuItem?.category || ""
+  );
   const [categories, setCategories] = useState([]);
-  const [
-    extraIngredientPrices,
-    setExtraIngredientPrices,
-  ] = useState(menuItem?.extraIngredientPrices || []);
+
+  const categoryIds = useMemo(
+    () => new Set(categories.map((c) => c._id)),
+    [categories]
+  );
 
   useEffect(() => {
-    fetch('/api/categories').then(res => {
-      res.json().then(categories => {
-        setCategories(categories);
+    let ignore = false;
+
+    fetch("/api/categories")
+      .then((res) => res.json())
+      .then((cats) => {
+        if (ignore) return;
+        setCategories(cats || []);
+
+        // ✅ FIX: ako kreiras novi item i category je prazna, postavi default na prvu kategoriju
+        if (!isEdit && (!category || category === "") && cats?.length > 0) {
+          setCategory(cats[0]._id);
+        }
+
+        // ✅ FIX: ako editujes item ali u state-u imas nešto što nije validno, fallback na prvu
+        if (isEdit && cats?.length > 0 && category && !categoryIds.has(category)) {
+          // u nekim slučajevima menuItem.category može biti populate objekat ili stari id
+          // pokušaj da izvučeš _id, ako ne uspe, fallback na prvu kategoriju
+          const maybeId =
+            typeof menuItem?.category === "object"
+              ? menuItem?.category?._id
+              : menuItem?.category;
+
+          if (maybeId && cats.some((c) => c._id === maybeId)) {
+            setCategory(maybeId);
+          } else {
+            setCategory(cats[0]._id);
+          }
+        }
+      })
+      .catch((err) => {
+        console.error("Failed to fetch categories:", err);
       });
-    });
+
+    return () => {
+      ignore = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  function handleSubmit(ev) {
+    ev.preventDefault();
+
+    const trimmedName = (name || "").trim();
+    const trimmedDesc = (description || "").trim();
+
+    // ✅ FIX: category mora biti validan id (ne sme "")
+    if (!category) {
+      alert("Please select a category.");
+      return;
+    }
+
+    // ✅ FIX: basePrice šaljemo kao broj (Mongo/Mongoose voli number)
+    const normalizedBasePrice =
+      basePrice === "" ? 0 : Number(String(basePrice).replace(",", "."));
+
+    if (Number.isNaN(normalizedBasePrice)) {
+      alert("Base price must be a number.");
+      return;
+    }
+
+    // Opciono: minimalna validacija imena
+    if (!trimmedName) {
+      alert("Item name is required.");
+      return;
+    }
+
+    onSubmit(ev, {
+      image,
+      name: trimmedName,
+      description: trimmedDesc,
+      basePrice: normalizedBasePrice,
+      sizes,
+      extraIngredientPrices,
+      category,
+    });
+  }
+
   return (
-    <form
-      onSubmit={ev =>
-        onSubmit(ev, {
-          image,name,description,basePrice,sizes,extraIngredientPrices,category,
-        })
-      }
-      className="mt-8 max-w-2xl mx-auto">
+    <form onSubmit={handleSubmit} className="mt-8 max-w-2xl mx-auto">
       <div
         className="md:grid items-start gap-4"
-        style={{gridTemplateColumns:'.3fr .7fr'}}>
+        style={{ gridTemplateColumns: ".3fr .7fr" }}
+      >
         <div>
           <EditableImage link={image} setLink={setImage} />
         </div>
+
         <div className="grow">
           <label>Item name</label>
           <input
             type="text"
             value={name}
-            onChange={ev => setName(ev.target.value)}
+            onChange={(ev) => setName(ev.target.value)}
           />
+
           <label>Description</label>
           <input
             type="text"
             value={description}
-            onChange={ev => setDescription(ev.target.value)}
+            onChange={(ev) => setDescription(ev.target.value)}
           />
+
           <label>Category</label>
-          <select value={category} onChange={ev => setCategory(ev.target.value)}>
-            {categories?.length > 0 && categories.map(c => (
-              <option key={c._id} value={c._id}>{c.name}</option>
-            ))}
+          <select
+            value={category || ""}
+            onChange={(ev) => setCategory(ev.target.value)}
+            required
+          >
+            {/* ✅ placeholder da ne izgleda kao da je izabrano a ustvari je "" */}
+            <option value="" disabled>
+              Select category
+            </option>
+
+            {categories?.length > 0 &&
+              categories.map((c) => (
+                <option key={c._id} value={c._id}>
+                  {c.name}
+                </option>
+              ))}
           </select>
+
           <label>Base price</label>
           <input
             type="text"
             value={basePrice}
-            onChange={ev => setBasePrice(ev.target.value)}
+            onChange={(ev) => setBasePrice(ev.target.value)}
           />
-          <MenuItemPriceProps name={'Sizes'}
-                              addLabel={'Add item size'}
-                              props={sizes}
-                              setProps={setSizes} />
-          <MenuItemPriceProps name={'Extra ingredients'}
-                              addLabel={'Add ingredients prices'}
-                              props={extraIngredientPrices}
-                              setProps={setExtraIngredientPrices}/>
+
+          <MenuItemPriceProps
+            name={"Sizes"}
+            addLabel={"Add item size"}
+            props={sizes}
+            setProps={setSizes}
+          />
+
+          <MenuItemPriceProps
+            name={"Extra ingredients"}
+            addLabel={"Add ingredients prices"}
+            props={extraIngredientPrices}
+            setProps={setExtraIngredientPrices}
+          />
+
           <button type="submit">Save</button>
         </div>
       </div>

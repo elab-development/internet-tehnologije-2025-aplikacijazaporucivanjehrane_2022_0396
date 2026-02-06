@@ -1,84 +1,148 @@
-'use client';
+"use client";
+
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
+import { useContext, useMemo, useState } from "react";
+import { CartContext } from "@/components/AppContext";
+import Image from "next/image";
 
-function AuthLinks({status, userName}) {
-  if (status === 'authenticated') {
+import Bars2 from "@/components/icons/Bars2";
+import ShoppingCart from "@/components/icons/ShoppingCart";
+
+function AuthLinks({ status, userName, onLinkClick }) {
+  if (status === "authenticated") {
     return (
       <>
-        <Link href={'/profile'} className="whitespace-nowrap">
+        <Link
+          href="/profile"
+          className="whitespace-nowrap"
+          onClick={onLinkClick}
+        >
           Hello, {userName}
         </Link>
         <button
+          type="button"
           onClick={() => signOut()}
-          className="bg-primary rounded-full text-white px-8 py-2">
+          className="bg-primary rounded-full text-white px-6 py-2 whitespace-nowrap"
+        >
           Logout
         </button>
       </>
     );
   }
-  if (status === 'unauthenticated') {
+
+  if (status === "unauthenticated") {
     return (
       <>
-        <Link href={'/login'}>Login</Link>
-        <Link href={'/register'} className="bg-primary rounded-full text-white px-8 py-2">
+        <Link href="/login" onClick={onLinkClick}>
+          Login
+        </Link>
+        <Link
+          href="/register"
+          onClick={onLinkClick}
+          className="bg-primary rounded-full text-white px-6 py-2 whitespace-nowrap"
+        >
           Register
         </Link>
       </>
     );
   }
+
+  // status === "loading"
+  return null;
 }
 
-export default function Header(){
+function CartLink({ count, onClick }) {
+  return (
+    <Link href="/cart" className="relative" onClick={onClick}>
+      <ShoppingCart />
+      {count > 0 && (
+        <span className="absolute -top-2 -right-3 bg-primary text-white text-xs min-w-[18px] h-[18px] px-1 rounded-full flex items-center justify-center">
+          {count}
+        </span>
+      )}
+    </Link>
+  );
+}
 
+export default function Header() {
   const session = useSession();
   const status = session?.status;
+
   const userData = session.data?.user;
-  let userName = userData?.name || userData?.email;
-  if (userName && userName.includes(' ')) {
-    userName = userName.split(' ')[0];
-  }
+  let userName = userData?.name || userData?.email || "";
+  if (userName && userName.includes(" ")) userName = userName.split(" ")[0];
 
-    return (
-    <header className="flex items-center  justify-between">
-      
-      <nav className="flex items-center gap-8 text-gray-500 font-semibold">
-        <Link className="text-primary font-semibold text-2xl" href={'/'}>
-          ST PIZZA
-      </Link>
-        <Link href={'/'}>Home</Link>
-        <Link href={''}>Menu</Link>
-        <Link href={''}>About</Link>
-        <Link href={''}>Contact</Link>
-       
-      </nav>
-      <nav className="flex items-center gap-4 text-gray-500 font-semibold">
-  {status === 'authenticated' && (
-    <>
-    <Link href={'/profile'} className="whitespace-nowrap">Hello, {userName}</Link>
+  const { cartProducts } = useContext(CartContext);
+  const cartCount = useMemo(() => cartProducts?.length || 0, [cartProducts]);
 
-    <button
-      onClick={() => signOut()}
-      className="bg-primary rounded-full text-white px-8 py-2"
-    >
-      Logout
-    </button>
-    </>
-  )}
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const closeMobileNav = () => setMobileNavOpen(false);
 
-  {status === 'unauthenticated' && (
-    <>
-      <Link href={'/login'}>Login</Link>
-      <Link
-        href={'/register'}
-        className="bg-primary rounded-full text-white px-8 py-2"
-      >
-        Register
-      </Link>
-    </>
-  )}
-</nav>
+  return (
+    <header className="w-full">
+      {/* MOBILE TOP BAR */}
+      <div className="flex items-center md:hidden justify-between">
+        <Link className="text-primary font-semibold text-2xl" href="/">
+    SRB Kuhinja
+        </Link>
 
+        <div className="flex gap-6 items-center">
+          <CartLink count={cartCount} onClick={closeMobileNav} />
+          <button
+            type="button"
+            className="p-2 border rounded-lg"
+            onClick={() => setMobileNavOpen((prev) => !prev)}
+            aria-label="Toggle navigation"
+          >
+            <Bars2 />
+          </button>
+        </div>
+      </div>
+
+      {/* MOBILE MENU */}
+      {mobileNavOpen && (
+        <div className="md:hidden p-4 bg-gray-200 rounded-lg mt-2 flex flex-col gap-3 text-center text-gray-700 font-semibold">
+          <Link href="/" onClick={closeMobileNav}>
+            Home
+          </Link>
+          <Link href="/menu" onClick={closeMobileNav}>
+            Menu
+          </Link>
+          <Link href="/about" onClick={closeMobileNav}>
+            About
+          </Link>
+          <Link href="/contact" onClick={closeMobileNav}>
+            Contact
+          </Link>
+
+          <div className="pt-2 border-t border-gray-300 flex flex-col gap-3">
+            <AuthLinks
+              status={status}
+              userName={userName}
+              onLinkClick={closeMobileNav}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* DESKTOP NAV */}
+      <div className="hidden md:flex items-center justify-between">
+        <nav className="flex items-center gap-8 text-gray-500 font-semibold">
+          <Link className="text-primary font-semibold text-2xl" href="/">
+            SRB Kuhinja
+          </Link>
+          <Link href="/">Početna</Link>
+          <Link href="/menu">Meni</Link>
+          <Link href="/about">O nama</Link>
+          <Link href="/contact">Kontakt</Link>
+        </nav>
+
+        <nav className="flex items-center gap-5 text-gray-500 font-semibold">
+          <CartLink count={cartCount} />
+          <AuthLinks status={status} userName={userName} />
+        </nav>
+      </div>
     </header>
-    );
+  );
 }
