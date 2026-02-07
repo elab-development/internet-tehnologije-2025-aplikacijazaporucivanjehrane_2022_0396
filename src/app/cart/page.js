@@ -11,7 +11,7 @@ import toast from "react-hot-toast";
 export default function CartPage() {
   const { cartProducts, removeCartProduct } = useContext(CartContext);
 
-  // ✅ Hydration guard: čeka da se komponenta mountuje (bitno kad cart dolazi iz localStorage)
+  // Hydration guard (bitno kad cart dolazi iz localStorage)
   const [isMounted, setIsMounted] = useState(false);
 
   const [address, setAddress] = useState({
@@ -29,10 +29,8 @@ export default function CartPage() {
   }, []);
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      if (window.location.href.includes("canceled=1")) {
-        toast.error("Payment failed 😔");
-      }
+    if (typeof window !== "undefined" && window.location.href.includes("canceled=1")) {
+      toast.error("Plaćanje nije uspelo 😔");
     }
   }, []);
 
@@ -62,9 +60,8 @@ export default function CartPage() {
   async function proceedToCheckout(ev) {
     ev.preventDefault();
 
-    // ✅ basic guard
     if (!cartProducts || cartProducts.length === 0) {
-      toast.error("Your cart is empty.");
+      toast.error("Korpa je prazna.");
       return;
     }
 
@@ -72,10 +69,7 @@ export default function CartPage() {
       fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          address,
-          cartProducts,
-        }),
+        body: JSON.stringify({ address, cartProducts }),
       }).then(async (response) => {
         if (response.ok) {
           const url = await response.json();
@@ -88,18 +82,17 @@ export default function CartPage() {
     });
 
     await toast.promise(promise, {
-      loading: "Preparing your order...",
-      success: "Redirecting to payment...",
-      error: "Something went wrong... Please try again later",
+      loading: "Pripremamo porudžbinu...",
+      success: "Preusmeravamo na plaćanje...",
+      error: "Nešto nije u redu... Pokušajte ponovo kasnije",
     });
   }
 
-  // ✅ Dok se ne mountuje, ne zaključuj da je prazno
   if (!isMounted) {
     return (
       <section className="mt-8 text-center">
-        <SectionHeaders mainHeader="Cart" />
-        <p className="mt-4 text-gray-500">Loading cart...</p>
+        <SectionHeaders mainHeader="Korpa" />
+        <p className="mt-4 text-gray-500">Učitavanje korpe...</p>
       </section>
     );
   }
@@ -107,16 +100,18 @@ export default function CartPage() {
   if (!cartProducts || cartProducts.length === 0) {
     return (
       <section className="mt-8 text-center">
-        <SectionHeaders mainHeader="Cart" />
-        <p className="mt-4">Your shopping cart is empty 😔</p>
+        <SectionHeaders mainHeader="Korpa" />
+        <p className="mt-4">Vaša korpa je prazna 😔</p>
       </section>
     );
   }
 
+  const deliveryFee = 200; // din
+
   return (
     <section className="mt-8">
       <div className="text-center">
-        <SectionHeaders mainHeader="Cart" />
+        <SectionHeaders mainHeader="Korpa" />
       </div>
 
       <div className="mt-8 grid gap-8 md:grid-cols-2">
@@ -126,37 +121,38 @@ export default function CartPage() {
             <CartProduct
               key={`${product?._id || "p"}-${index}`}
               product={product}
-              onRemove={removeCartProduct}
+              onRemove={() => removeCartProduct(index)}
             />
           ))}
 
           <div className="py-2 pr-2 md:pr-16 flex justify-end items-center">
             <div className="text-gray-500 text-right">
-              Subtotal:
+              Međuzbir:
               <br />
-              Delivery:
+              Dostava:
               <br />
-              Total:
+              Ukupno:
             </div>
             <div className="font-semibold pl-2 text-right">
-              ${subtotal}
+              {subtotal} din
               <br />
-              $5
-              <br />${subtotal + 5}
+              {deliveryFee} din
+              <br />
+              {subtotal + deliveryFee} din
             </div>
           </div>
         </div>
 
         {/* RIGHT: checkout */}
         <div className="bg-gray-100 p-4 rounded-lg">
-          <h2 className="font-semibold text-lg mb-2">Checkout</h2>
+          <h2 className="font-semibold text-lg mb-2">Plaćanje</h2>
           <form onSubmit={proceedToCheckout}>
             <AddressInputs
               addressProps={address}
               setAddressProp={handleAddressChange}
             />
             <button type="submit" className="mt-2">
-              Pay ${subtotal + 5}
+              Plati {subtotal + deliveryFee} din
             </button>
           </form>
         </div>

@@ -13,27 +13,26 @@ export default function EditableImage({ link, setLink }) {
       method: "POST",
       body: data,
     }).then(async (response) => {
-      if (!response.ok) throw new Error("Upload failed");
-      const uploadedLink = await response.json(); // očekuje JSON string (tvoj backend tako vraća)
+      if (!response.ok) throw new Error("Otpremanje nije uspelo");
+      const uploadedLink = await response.json(); // očekuje JSON string
       setLink(uploadedLink);
       return uploadedLink;
     });
 
     await toast.promise(uploadPromise, {
-      loading: "Uploading...",
-      success: "Upload complete",
-      error: "Upload error",
+      loading: "Otpremanje...",
+      success: "Slika je otpremljena",
+      error: "Greška pri otpremanju",
     });
   }
 
   return (
     <>
-      {/* ✅ stabilan wrapper sa aspect ratio + object-cover */}
       <div className="relative w-full aspect-square mb-1 overflow-hidden rounded-lg bg-gray-200">
         {link ? (
           <Image
             src={link}
-            alt="image"
+            alt="slika"
             fill
             className="object-cover"
             sizes="(max-width: 768px) 100vw, 250px"
@@ -41,7 +40,7 @@ export default function EditableImage({ link, setLink }) {
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-gray-500">
-            No image
+            Nema slike
           </div>
         )}
       </div>
@@ -49,7 +48,7 @@ export default function EditableImage({ link, setLink }) {
       <label>
         <input type="file" className="hidden" onChange={handleFileChange} />
         <span className="block border border-gray-300 rounded-lg p-2 text-center cursor-pointer">
-          Change image
+          Promeni sliku
         </span>
       </label>
     </>

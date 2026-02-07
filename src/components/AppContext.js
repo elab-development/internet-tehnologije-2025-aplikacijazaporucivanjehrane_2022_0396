@@ -21,7 +21,7 @@ function CartProviderInner({ children }) {
 
   const ls = typeof window !== "undefined" ? window.localStorage : null;
 
-  // ✅ cart key po korisniku (guest ili email)
+  // cart key po korisniku (guest ili email)
   const storageKey = useMemo(() => {
     return userEmail ? `cart:${userEmail}` : "cart:guest";
   }, [userEmail]);
@@ -29,7 +29,7 @@ function CartProviderInner({ children }) {
   const [cartProducts, setCartProducts] = useState([]);
   const [loaded, setLoaded] = useState(false);
 
-  // ✅ učitaj cart kad se promeni korisnik (login/logout)
+  // učitaj cart kad se promeni korisnik (login/logout)
   useEffect(() => {
     if (!ls) return;
     const saved = ls.getItem(storageKey);
@@ -42,7 +42,7 @@ function CartProviderInner({ children }) {
     ls.setItem(storageKey, JSON.stringify(products));
   }
 
-  // ✅ auto-save na svaku promenu (posle load)
+  // auto-save na svaku promenu (posle load)
   useEffect(() => {
     if (!loaded) return;
     saveCartProductsToLocalStorage(cartProducts);
@@ -54,10 +54,10 @@ function CartProviderInner({ children }) {
     if (ls) ls.removeItem(storageKey);
   }
 
-  // ✅ remove po index-u (najstabilnije)
+  // remove po index-u
   function removeCartProduct(indexToRemove) {
     setCartProducts((prev) => prev.filter((_, idx) => idx !== indexToRemove));
-    toast.success("Product removed");
+    toast.success("Proizvod je uklonjen iz korpe");
   }
 
   function addToCart(product, size = null, extras = []) {
@@ -65,7 +65,7 @@ function CartProviderInner({ children }) {
       const cartProduct = { ...product, size, extras };
       return [...prev, cartProduct];
     });
-    toast.success("Added to cart");
+    toast.success("Dodato u korpu");
   }
 
   return (

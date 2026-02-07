@@ -1,14 +1,9 @@
 'use client';
-import EditableImage from "@/components/layout/EditableImage";
-import InfoBox from "@/components/layout/InfoBox";
-import SuccessBox from "@/components/layout/SuccessBox";
 import UserForm from "@/components/layout/UserForm";
 import UserTabs from "@/components/layout/UserTabs";
-import {useSession} from "next-auth/react";
-import Image from "next/image";
-import Link from "next/link";
-import {redirect} from "next/navigation";
-import {useEffect, useState} from "react";
+import { useSession } from "next-auth/react";
+import { redirect } from "next/navigation";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 export default function ProfilePage() {
@@ -17,7 +12,7 @@ export default function ProfilePage() {
   const [user, setUser] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [profileFetched, setProfileFetched] = useState(false);
-  const {status} = session;
+  const { status } = session;
 
   useEffect(() => {
     if (status === 'authenticated') {
@@ -26,7 +21,7 @@ export default function ProfilePage() {
           setUser(data);
           setIsAdmin(data.admin);
           setProfileFetched(true);
-        })
+        });
       });
     }
   }, [session, status]);
@@ -37,25 +32,22 @@ export default function ProfilePage() {
     const savingPromise = new Promise(async (resolve, reject) => {
       const response = await fetch('/api/profile', {
         method: 'PUT',
-        headers: {'Content-Type': 'application/json'},
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
-      if (response.ok)
-        resolve()
-      else
-        reject();
+      if (response.ok) resolve();
+      else reject();
     });
 
     await toast.promise(savingPromise, {
-      loading: 'Saving...',
-      success: 'Profile saved!',
-      error: 'Error',
+      loading: 'Čuvanje...',
+      success: 'Profil je sačuvan!',
+      error: 'Greška',
     });
-
   }
 
   if (status === 'loading' || !profileFetched) {
-    return 'Loading...';
+    return 'Učitavanje...';
   }
 
   if (status === 'unauthenticated') {

@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
 import { useContext, useMemo, useState } from "react";
 import { CartContext } from "@/components/AppContext";
-import Image from "next/image";
 
 import Bars2 from "@/components/icons/Bars2";
 import ShoppingCart from "@/components/icons/ShoppingCart";
@@ -18,14 +17,14 @@ function AuthLinks({ status, userName, onLinkClick }) {
           className="whitespace-nowrap"
           onClick={onLinkClick}
         >
-          Hello, {userName}
+          Zdravo, {userName}
         </Link>
         <button
           type="button"
           onClick={() => signOut()}
           className="bg-primary rounded-full text-white px-6 py-2 whitespace-nowrap"
         >
-          Logout
+          Odjavi se
         </button>
       </>
     );
@@ -35,21 +34,20 @@ function AuthLinks({ status, userName, onLinkClick }) {
     return (
       <>
         <Link href="/login" onClick={onLinkClick}>
-          Login
+          Prijava
         </Link>
         <Link
           href="/register"
           onClick={onLinkClick}
           className="bg-primary rounded-full text-white px-6 py-2 whitespace-nowrap"
         >
-          Register
+          Registracija
         </Link>
       </>
     );
   }
 
-  // status === "loading"
-  return null;
+  return null; // loading
 }
 
 function CartLink({ count, onClick }) {
@@ -84,7 +82,7 @@ export default function Header() {
       {/* MOBILE TOP BAR */}
       <div className="flex items-center md:hidden justify-between">
         <Link className="text-primary font-semibold text-2xl" href="/">
-    SRB Kuhinja
+          SRB Kuhinja
         </Link>
 
         <div className="flex gap-6 items-center">
@@ -93,7 +91,7 @@ export default function Header() {
             type="button"
             className="p-2 border rounded-lg"
             onClick={() => setMobileNavOpen((prev) => !prev)}
-            aria-label="Toggle navigation"
+            aria-label="Otvori/zatvori navigaciju"
           >
             <Bars2 />
           </button>
@@ -104,16 +102,16 @@ export default function Header() {
       {mobileNavOpen && (
         <div className="md:hidden p-4 bg-gray-200 rounded-lg mt-2 flex flex-col gap-3 text-center text-gray-700 font-semibold">
           <Link href="/" onClick={closeMobileNav}>
-            Home
+            Početna
           </Link>
           <Link href="/menu" onClick={closeMobileNav}>
-            Menu
+            Meni
           </Link>
           <Link href="/about" onClick={closeMobileNav}>
-            About
+            O nama
           </Link>
           <Link href="/contact" onClick={closeMobileNav}>
-            Contact
+            Kontakt
           </Link>
 
           <div className="pt-2 border-t border-gray-300 flex flex-col gap-3">

@@ -1,5 +1,5 @@
-import Plus from "@/components/icons/Plus";
-import Trash from "@/components/icons/Trash";
+"use client";
+
 import EditableImage from "@/components/layout/EditableImage";
 import MenuItemPriceProps from "@/components/layout/MenuItemPriceProps";
 import { useEffect, useMemo, useState } from "react";
@@ -18,7 +18,6 @@ export default function MenuItemForm({ onSubmit, menuItem }) {
     menuItem?.extraIngredientPrices || []
   );
 
-  // bitno: za create krece kao "", ali ce dobiti default kad stignu kategorije
   const [category, setCategory] = useState(
     menuItem?.category?._id || menuItem?.category || ""
   );
@@ -38,15 +37,13 @@ export default function MenuItemForm({ onSubmit, menuItem }) {
         if (ignore) return;
         setCategories(cats || []);
 
-        // ✅ FIX: ako kreiras novi item i category je prazna, postavi default na prvu kategoriju
+        // default za create
         if (!isEdit && (!category || category === "") && cats?.length > 0) {
           setCategory(cats[0]._id);
         }
 
-        // ✅ FIX: ako editujes item ali u state-u imas nešto što nije validno, fallback na prvu
+        // fallback za edit ako category nije validan
         if (isEdit && cats?.length > 0 && category && !categoryIds.has(category)) {
-          // u nekim slučajevima menuItem.category može biti populate objekat ili stari id
-          // pokušaj da izvučeš _id, ako ne uspe, fallback na prvu kategoriju
           const maybeId =
             typeof menuItem?.category === "object"
               ? menuItem?.category?._id
@@ -75,24 +72,21 @@ export default function MenuItemForm({ onSubmit, menuItem }) {
     const trimmedName = (name || "").trim();
     const trimmedDesc = (description || "").trim();
 
-    // ✅ FIX: category mora biti validan id (ne sme "")
     if (!category) {
-      alert("Please select a category.");
+      alert("Molimo izaberite kategoriju.");
       return;
     }
 
-    // ✅ FIX: basePrice šaljemo kao broj (Mongo/Mongoose voli number)
     const normalizedBasePrice =
       basePrice === "" ? 0 : Number(String(basePrice).replace(",", "."));
 
     if (Number.isNaN(normalizedBasePrice)) {
-      alert("Base price must be a number.");
+      alert("Osnovna cena mora biti broj.");
       return;
     }
 
-    // Opciono: minimalna validacija imena
     if (!trimmedName) {
-      alert("Item name is required.");
+      alert("Naziv proizvoda je obavezan.");
       return;
     }
 
@@ -118,29 +112,30 @@ export default function MenuItemForm({ onSubmit, menuItem }) {
         </div>
 
         <div className="grow">
-          <label>Item name</label>
+          <label>Naziv stavke</label>
           <input
             type="text"
+            placeholder="Unesite naziv"
             value={name}
             onChange={(ev) => setName(ev.target.value)}
           />
 
-          <label>Description</label>
+          <label>Opis</label>
           <input
             type="text"
+            placeholder="Kratak opis"
             value={description}
             onChange={(ev) => setDescription(ev.target.value)}
           />
 
-          <label>Category</label>
+          <label>Kategorija</label>
           <select
             value={category || ""}
             onChange={(ev) => setCategory(ev.target.value)}
             required
           >
-            {/* ✅ placeholder da ne izgleda kao da je izabrano a ustvari je "" */}
             <option value="" disabled>
-              Select category
+              Izaberite kategoriju
             </option>
 
             {categories?.length > 0 &&
@@ -151,28 +146,29 @@ export default function MenuItemForm({ onSubmit, menuItem }) {
               ))}
           </select>
 
-          <label>Base price</label>
+          <label>Osnovna cena</label>
           <input
             type="text"
+            placeholder="npr. 950"
             value={basePrice}
             onChange={(ev) => setBasePrice(ev.target.value)}
           />
 
           <MenuItemPriceProps
-            name={"Sizes"}
-            addLabel={"Add item size"}
+            name={"Veličine"}
+            addLabel={"Dodaj veličinu"}
             props={sizes}
             setProps={setSizes}
           />
 
           <MenuItemPriceProps
-            name={"Extra ingredients"}
-            addLabel={"Add ingredients prices"}
+            name={"Dodatni sastojci"}
+            addLabel={"Dodaj dodatak"}
             props={extraIngredientPrices}
             setProps={setExtraIngredientPrices}
           />
 
-          <button type="submit">Save</button>
+          <button type="submit">Sačuvaj</button>
         </div>
       </div>
     </form>
