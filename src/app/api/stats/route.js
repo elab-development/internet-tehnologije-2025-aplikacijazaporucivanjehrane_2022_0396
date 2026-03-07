@@ -1,8 +1,12 @@
-import { NextResponse } from "next/server";
 import { connectDB } from "@/libs/mongoose";
 import { Order } from "@/models/Order";
 import { MenuItem } from "@/models/MenuItem";
 import { Category } from "@/models/Category";
+import { jsonWithCors } from "@/libs/cors";
+
+export async function OPTIONS(req) {
+  return jsonWithCors(req, null);
+}
 
 function safeNumber(x) {
   const n = Number(x);
@@ -90,8 +94,8 @@ export async function GET(req) {
 
     const ordersCount = orders.length;
     const avgOrderValue = ordersCount > 0 ? revenueTotal / ordersCount : 0;
-
-    return NextResponse.json({
+    
+    return jsonWithCors(req, {
       range: { from: from.toISOString(), to: to.toISOString() },
       totals: {
         orders: ordersCount,
@@ -102,6 +106,6 @@ export async function GET(req) {
     });
   } catch (err) {
     console.error(err);
-    return NextResponse.json({ error: "Failed to load stats" }, { status: 500 });
+    return jsonWithCors(req, { error: "Failed to load stats" }, { status: 500 });
   }
 }
