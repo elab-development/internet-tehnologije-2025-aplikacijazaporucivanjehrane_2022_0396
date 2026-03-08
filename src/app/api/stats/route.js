@@ -25,11 +25,12 @@ export async function GET(req) {
     const from = new Date();
     from.setDate(to.getDate() - safeDays);
 
-    // uzimamo samo plaćene porudžbine, ako želiš i neplaćene, skloni paid:true
+    // uzimamo sve i placene i neplacene
     const orders = await Order.find({
-      paid: true,
       createdAt: { $gte: from, $lte: to },
     }).lean();
+
+    console.log("STATS ORDERS COUNT:", orders.length);
 
     // skupi sve unique MenuItem id-jeve iz cartProducts
     const menuItemIds = new Set();
