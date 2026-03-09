@@ -1,5 +1,7 @@
 // src/libs/openapi.js
 
+const baseUrl = (process.env.NEXTAUTH_URL || "http://localhost:3000").replace(/\/$/, "");
+
 export const openapi = {
   openapi: "3.0.0",
   info: {
@@ -7,7 +9,7 @@ export const openapi = {
     version: "1.0.0",
     description: "API specifikacija za aplikaciju za poručivanje hrane (ITEH).",
   },
-  servers: [{ url: "http://localhost:3000", description: "Local" }],
+  servers: [{ url: baseUrl, description: "API server" }],
 
   components: {
     securitySchemes: {
