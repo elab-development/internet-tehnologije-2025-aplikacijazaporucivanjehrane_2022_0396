@@ -152,7 +152,7 @@ src/
 
 ├── components/     → React komponente
 
-└── context/        → State management
+└── ____tests____/        → Testovi
 
 
 ---
