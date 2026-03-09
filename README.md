@@ -131,17 +131,29 @@ http://localhost:3000
 # 🗂️ Struktura projekta
 
 src/
+
 ├── app/
+
 │   ├── api/        → API rute
+
 │   ├── docs/       → Swagger UI
+
 │   ├── menu/       → Prikaz menija
+
 │   ├── orders/     → Porudžbine
+
 │   └── ...
+
 │
+
 ├── models/         → Mongoose modeli
+
 ├── libs/           → OpenAPI, CORS, sanitization
+
 ├── components/     → React komponente
+
 └── context/        → State management
+
 
 ---
 
@@ -180,7 +192,9 @@ Deploy se automatski pokreće nakon push-a na `main` granu (CI/CD pipeline).
 # 👨‍💻 Autori
 
 Danilo Bogavac
+
 Aleksandar Stojilković
+
 Tamara Cvejić
 
 Fakultet organizacionih nauka
