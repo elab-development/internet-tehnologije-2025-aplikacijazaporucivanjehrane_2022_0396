@@ -1,11 +1,11 @@
-import {authOptions} from "@/libs/authOptions";
-import {jsonWithCors} from "@/libs/cors";
-import {sanitizeObject, sanitizeString} from "@/libs/sanitize";
-import {MenuItem} from "@/models/MenuItem";
-import {Order} from "@/models/Order";
+import { authOptions } from "@/libs/authOptions";
+import { jsonWithCors } from "@/libs/cors";
+import { sanitizeObject, sanitizeString } from "@/libs/sanitize";
+import { MenuItem } from "@/models/MenuItem";
+import { Order } from "@/models/Order";
 import mongoose from "mongoose";
-import {getServerSession} from "next-auth";
-const stripe = require('stripe')(process.env.STRIPE_SK);
+import { getServerSession } from "next-auth";
+const stripe = require("stripe")(process.env.STRIPE_SK);
 
 export async function OPTIONS(req) {
   return jsonWithCors(req, null);
@@ -14,11 +14,10 @@ export async function OPTIONS(req) {
 export async function POST(req) {
   mongoose.connect(process.env.MONGO_URL);
 
-  const {cartProducts, address} = await req.json();
+  const { cartProducts, address } = await req.json();
   const session = await getServerSession(authOptions);
   const userEmail = session?.user?.email;
 
-  // XSS zaštita: sanitizujemo korisničke podatke pre upisa u bazu i slanja ka Stripe-u
   const safeAddress = sanitizeObject(address || {});
   const safeCartProducts = sanitizeObject(cartProducts || []);
 
@@ -31,30 +30,36 @@ export async function POST(req) {
 
   const stripeLineItems = [];
   for (const cartProduct of safeCartProducts) {
-
     const productInfo = await MenuItem.findById(cartProduct._id);
 
     let productPrice = productInfo.basePrice;
     if (cartProduct.size) {
-      const size = productInfo.sizes
-        .find(size => size._id.toString() === cartProduct.size._id.toString());
+      const size = productInfo.sizes.find(
+        (size) => size._id.toString() === cartProduct.size._id.toString()
+      );
       productPrice += size.price;
     }
+
     if (cartProduct.extras?.length > 0) {
       for (const cartProductExtraThing of cartProduct.extras) {
         const productExtras = productInfo.extraIngredientPrices;
-        const extraThingInfo = productExtras
-          .find(extra => extra._id.toString() === cartProductExtraThing._id.toString());
+        const extraThingInfo = productExtras.find(
+          (extra) =>
+            extra._id.toString() === cartProductExtraThing._id.toString()
+        );
         productPrice += extraThingInfo.price;
       }
     }
 
-    const productName = typeof cartProduct.name === "string" ? sanitizeString(cartProduct.name) : "";
+    const productName =
+      typeof cartProduct.name === "string"
+        ? sanitizeString(cartProduct.name)
+        : "";
 
     stripeLineItems.push({
       quantity: 1,
       price_data: {
-        currency: 'USD',
+        currency: "USD",
         product_data: {
           name: productName,
         },
@@ -63,24 +68,26 @@ export async function POST(req) {
     });
   }
 
+  const baseUrl = (process.env.NEXTAUTH_URL || "http://localhost:3000").replace(/\/$/, "");
+
   const stripeSession = await stripe.checkout.sessions.create({
     line_items: stripeLineItems,
-    mode: 'payment',
+    mode: "payment",
     customer_email: userEmail,
-    success_url: process.env.NEXTAUTH_URL + 'orders/' + orderDoc._id.toString() + '?clear-cart=1',
-    cancel_url: process.env.NEXTAUTH_URL + 'cart?canceled=1',
-    metadata: {orderId:orderDoc._id.toString()},
+    success_url: `${baseUrl}/orders/${orderDoc._id.toString()}?clear-cart=1`,
+    cancel_url: `${baseUrl}/cart?canceled=1`,
+    metadata: { orderId: orderDoc._id.toString() },
     payment_intent_data: {
-      metadata:{orderId:orderDoc._id.toString()},
+      metadata: { orderId: orderDoc._id.toString() },
     },
     shipping_options: [
       {
         shipping_rate_data: {
-          display_name: 'Delivery fee',
-          type: 'fixed_amount',
-          fixed_amount: {amount: 500, currency: 'USD'},
+          display_name: "Delivery fee",
+          type: "fixed_amount",
+          fixed_amount: { amount: 500, currency: "USD" },
         },
-      }
+      },
     ],
   });
 
