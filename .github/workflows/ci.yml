@@ -15,6 +15,19 @@ jobs:
   test-and-build:
     runs-on: ubuntu-latest
 
+    env:
+      MONGO_URL: ${{ secrets.MONGO_URL }}
+      NEXTAUTH_URL: ${{ secrets.NEXTAUTH_URL }}
+      SECRET: ${{ secrets.SECRET }}
+      GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+      GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+      AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
+      AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+      STRIPE_SK: ${{ secrets.STRIPE_SK }}
+      STRIPE_PK: ${{ secrets.STRIPE_PK }}
+
     steps:
       - name: Checkout koda
         uses: actions/checkout@v4
@@ -30,11 +43,6 @@ jobs:
 
       - name: Pokreni testove
         run: npm test
-
-      - name: Kreiraj dummy .env
-        run: |
-          echo "MONGO_URL=mongodb://localhost:27017/test" >> .env
-          echo "NEXTAUTH_SECRET=testsecret" >> .env
 
       - name: Build aplikacije
         run: npm run build
