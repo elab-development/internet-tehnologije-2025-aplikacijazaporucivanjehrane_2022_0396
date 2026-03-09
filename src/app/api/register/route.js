@@ -1,5 +1,5 @@
 import {User} from "@/models/User";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import {jsonWithCors} from "@/libs/cors";
 import {sanitizeString} from "@/libs/sanitize";
 import {isValidEmail} from "@/libs/validation";

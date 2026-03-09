@@ -1,7 +1,7 @@
 
 import { UserInfo } from "@/models/UserInfo";
 import { User } from "@/models/User";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import { connectDB } from "@/libs/mongoose";
