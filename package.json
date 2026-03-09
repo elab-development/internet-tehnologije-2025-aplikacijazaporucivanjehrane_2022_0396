@@ -2,6 +2,9 @@
   "name": "ordering-app",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+  "node": "20.x"
+  },
   "packageManager": "yarn@1.22.22",
   "scripts": {
     "dev": "next dev",
