@@ -1,70 +1,75 @@
-🍔 Ordering App – ITEH Projekat
+# 🍔 Ordering App – ITEH Projekat
 
-Full-stack web aplikacija za poručivanje hrane razvijena u okviru predmeta Internet Tehnologije (ITEH).
+Full-stack web aplikacija za poručivanje hrane razvijena u okviru predmeta **Internet Tehnologije (ITEH)**.
 
-Aplikacija omogućava korisnicima pregled menija, dodavanje proizvoda u korpu, kreiranje porudžbina i online plaćanje putem Stripe servisa. Administratori imaju mogućnost upravljanja kategorijama, stavkama menija i korisnicima.
+Aplikacija omogućava korisnicima pregled menija, dodavanje proizvoda u korpu, kreiranje porudžbina i online plaćanje putem **Stripe** servisa. Administratori imaju mogućnost upravljanja kategorijama, stavkama menija i korisnicima.
 
-🚀 Tehnologije
+---
 
-Frontend:
+# 🌐 Produkciona verzija
 
-Next.js (App Router)
+Aplikacija je dostupna na:
 
-React
+**Production:**
+https://internet-tehnologije-2025-aplikacij-puce.vercel.app
 
-Tailwind CSS
+**Swagger API dokumentacija:**
+https://internet-tehnologije-2025-aplikacij-puce.vercel.app/api/swagger
 
-Backend:
+---
 
-Next.js API Routes
+# 🚀 Tehnologije
 
-MongoDB (Mongoose)
+## Frontend
 
-Autentifikacija:
+* Next.js (App Router)
+* React
+* Tailwind CSS
 
-NextAuth (credentials + Google OAuth)
+## Backend
 
-Eksterni servisi:
+* Next.js API Routes
+* MongoDB
+* Mongoose
 
-Stripe (online plaćanje)
+## Autentifikacija
 
-AWS S3 (upload slika)
+* NextAuth (Credentials + Google OAuth)
 
-DevOps:
+## Eksterni servisi
 
-Docker
+* Stripe (online plaćanje)
+* AWS S3 (upload slika)
 
-Docker Compose
+## DevOps
 
-Swagger (OpenAPI 3.0 specifikacija)
+* Docker
+* Docker Compose
+* Swagger (OpenAPI 3.0)
 
-📦 Funkcionalnosti
+---
 
-Korisnik:
+# 📦 Funkcionalnosti
 
-Registracija i prijava
+## Korisnik
 
-Pregled menija
+* Registracija i prijava
+* Pregled menija
+* Dodavanje proizvoda u korpu
+* Kreiranje porudžbine
+* Plaćanje putem Stripe-a
+* Pregled sopstvenih porudžbina
 
-Dodavanje proizvoda u korpu
+## Administrator
 
-Kreiranje porudžbine
+* CRUD operacije nad kategorijama
+* CRUD operacije nad stavkama menija
+* Pregled svih porudžbina
+* Pregled korisnika
 
-Plaćanje putem Stripe-a
+---
 
-Pregled sopstvenih porudžbina
-
-Administrator:
-
-CRUD operacije nad kategorijama
-
-CRUD operacije nad stavkama menija
-
-Pregled svih porudžbina
-
-Pregled korisnika
-
-📄 API Dokumentacija
+# 📄 API Dokumentacija
 
 Swagger UI je dostupan na:
 
@@ -74,18 +79,20 @@ OpenAPI JSON specifikacija:
 
 http://localhost:3000/api/swagger
 
-⚙️ Pokretanje projekta (Development)
+---
 
-Klonirati repozitorijum
+# ⚙️ Pokretanje projekta (Development)
+
+## 1. Kloniranje repozitorijuma
 
 git clone <repo-url>
 cd <project-folder>
 
-Instalirati зависности
+## 2. Instalacija dependencija
 
 npm install
 
-Kreirati .env.local fajl i dodati:
+## 3. Kreiranje `.env.local` fajla
 
 MONGO_URL=your_mongodb_connection_string
 NEXTAUTH_SECRET=your_secret
@@ -99,7 +106,7 @@ AWS_SECRET_ACCESS_KEY=your_secret_key
 AWS_REGION=your_region
 AWS_BUCKET_NAME=your_bucket
 
-Pokrenuti aplikaciju
+## 4. Pokretanje aplikacije
 
 npm run dev
 
@@ -107,7 +114,9 @@ Aplikacija će biti dostupna na:
 
 http://localhost:3000
 
-🐳 Pokretanje pomoću Docker-a
+---
+
+# 🐳 Pokretanje pomoću Docker-a
 
 Build i pokretanje kontejnera:
 
@@ -117,46 +126,64 @@ Aplikacija će biti dostupna na:
 
 http://localhost:3000
 
-🗂️ Struktura projekta
+---
+
+# 🗂️ Struktura projekta
+
 src/
- ├── app/
- │   ├── api/           → API rute
- │   ├── docs/          → Swagger UI
- │   ├── menu/          → Prikaz menija
- │   ├── orders/        → Porudžbine
- │   └── ...
- ├── models/            → Mongoose modeli
- ├── libs/              → OpenAPI, pomoćne funkcije
- └── components/        → Reusable React komponente
-🔐 Bezbednost
+├── app/
+│   ├── api/        → API rute
+│   ├── docs/       → Swagger UI
+│   ├── menu/       → Prikaz menija
+│   ├── orders/     → Porudžbine
+│   └── ...
+│
+├── models/         → Mongoose modeli
+├── libs/           → OpenAPI, CORS, sanitization
+├── components/     → React komponente
+└── context/        → State management
 
-Implementirane su sledeće bezbednosne mere:
+---
 
-Autentifikacija putem NextAuth
+# 🔐 Bezbednost
 
-Ograničen pristup admin rutama
+U aplikaciji su implementirane sledeće bezbednosne mere:
 
-Zaštita od neautorizovanog pristupa (role-based logika)
+* Autentifikacija putem **NextAuth**
+* **Role-based pristup** za administratorske rute
+* **CORS zaštita** za API rute
+* **XSS sanitizacija** korisničkih inputa
+* **Stripe webhook verifikacija potpisa**
+* Validacija podataka pre upisa u bazu
 
-Stripe webhook validacija potpisa
+---
 
+# 🔌 Eksterni API servisi
 
-🌐 Produkciono okruženje
+Projekat koristi sledeće eksterne servise:
 
-Projekat se može deploy-ovati na:
+* **Stripe API** – procesiranje online plaćanja
+* **AWS S3 API** – upload i skladištenje slika
 
-Vercel
+---
 
-Render
+# ☁️ Deployment
 
-Railway
+Aplikacija je deploy-ovana na:
 
-Bilo koju cloud platformu sa podrškom za Node.js i MongoDB
+**Vercel**
 
-👨‍💻 Autori
+Deploy se automatski pokreće nakon push-a na `main` granu (CI/CD pipeline).
+
+---
+
+# 👨‍💻 Autori
 
 Danilo Bogavac
 Aleksandar Stojilković
 Tamara Cvejić
-FON – Informacioni sistemi i tehnologije
-Predmet: Internet Tehnologije (ITEH)
+
+Fakultet organizacionih nauka
+Informacioni sistemi i tehnologije
+
+Predmet: **Internet Tehnologije (ITEH)**
