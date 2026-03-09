@@ -31,5 +31,10 @@ jobs:
       - name: Pokreni testove
         run: npm test
 
+      - name: Kreiraj dummy .env
+        run: |
+          echo "MONGO_URL=mongodb://localhost:27017/test" >> .env
+          echo "NEXTAUTH_SECRET=testsecret" >> .env
+
       - name: Build aplikacije
         run: npm run build
