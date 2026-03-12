@@ -189,6 +189,9 @@ Deploy se automatski pokreće nakon push-a na `main` granu (CI/CD pipeline).
 
 ---
 
+
+
+
 # 👨‍💻 Autori
 
 Danilo Bogavac
